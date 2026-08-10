@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import json
 from contextlib import asynccontextmanager
+from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import FileResponse, Response, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from ark_client import ark_client
@@ -21,6 +24,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="知识助手", lifespan=lifespan)
 
+# gzip 静态资源, 阈值 500B 起压 (小于这个 gzip 反而更慢)
+app.add_middleware(GZipMiddleware, minimum_size=500)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -149,3 +154,44 @@ async def chat(req: ChatRequest) -> StreamingResponse:
         yield "event: done\ndata: {}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+# ---------- 前端静态资源 (npm run build 产物) ----------
+_FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+
+
+class ImmutableAssets(StaticFiles):
+    """/assets/ 下的文件 Vite 产出时文件名已带 hash, 永久缓存."""
+
+    def is_not_modified(self, response_headers, request_headers) -> bool:  # type: ignore[override]
+        return super().is_not_modified(response_headers, request_headers)
+
+    async def get_response(self, path: str, scope):
+        resp = await super().get_response(path, scope)
+        resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return resp
+
+
+if _FRONTEND_DIST.exists():
+    app.mount(
+        "/assets",
+        ImmutableAssets(directory=str(_FRONTEND_DIST / "assets")),
+        name="assets",
+    )
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa_fallback(full_path: str, request: Request):
+        # 走到这里说明不是 /api/*, 也不是 /assets/*.
+        # 若请求的是 dist 里真实存在的静态文件 (favicon 等), 直接返回;
+        # 否则一律回 index.html, 让前端路由接管.
+        candidate = _FRONTEND_DIST / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(candidate)
+        index = _FRONTEND_DIST / "index.html"
+        if not index.exists():
+            return Response("frontend not built", status_code=503)
+        # index.html 不缓存, 保证发布后立即生效
+        return FileResponse(
+            index,
+            headers={"Cache-Control": "no-cache, must-revalidate"},
+        )

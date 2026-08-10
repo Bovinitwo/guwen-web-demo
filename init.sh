@@ -54,6 +54,8 @@ if [[ "$NODEMAJOR" -lt 18 ]]; then
 fi
 echo "    Node $(node -v), npm $(npm -v)"
 (cd frontend && npm install --no-fund --no-audit)
+echo "    npm run build 打生产包 → frontend/dist/"
+(cd frontend && npm run build)
 
 # ---------- 4. backend/.env 模板 ----------
 echo "==> [4/4] 检查 backend/.env"
