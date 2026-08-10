@@ -17,6 +17,21 @@ mkdir -p logs
 
 port_busy() { lsof -iTCP:"$1" -sTCP:LISTEN -t >/dev/null 2>&1; }
 
+# dist 不存在, 或任意源文件比 dist/index.html 新 -> 需要 rebuild
+frontend_needs_build() {
+  local dist="$ROOT/frontend/dist/index.html"
+  [[ -f "$dist" ]] || return 0
+  local newer
+  newer=$(find \
+    "$ROOT/frontend/src" \
+    "$ROOT/frontend/index.html" \
+    "$ROOT/frontend/package.json" \
+    "$ROOT/frontend/vite.config.ts" \
+    "$ROOT/frontend/tsconfig.json" \
+    -newer "$dist" -print -quit 2>/dev/null)
+  [[ -n "$newer" ]]
+}
+
 # ---------- backend ----------
 if port_busy "$BACKEND_PORT"; then
   echo "[skip] backend: 端口 $BACKEND_PORT 已被占用"
@@ -29,8 +44,12 @@ else
     echo "[error] backend/.env 不存在，先跑 ./init.sh 再编辑 backend/.env"
     exit 1
   fi
-  if [[ "$MODE" == "prod" && ! -f "$ROOT/frontend/dist/index.html" ]]; then
-    echo "[info] frontend/dist 不存在, 先打包 (npm run build)…"
+  if [[ "$MODE" == "prod" ]] && frontend_needs_build; then
+    if [[ ! -d "$ROOT/frontend/node_modules" ]]; then
+      echo "[info] frontend/node_modules 不存在, 先跑 npm install…"
+      (cd frontend && npm install)
+    fi
+    echo "[info] frontend 源码有变化 (或首次), 打包 (npm run build)…"
     (cd frontend && npm run build)
   fi
   echo "[start] backend $HOST:$BACKEND_PORT"
