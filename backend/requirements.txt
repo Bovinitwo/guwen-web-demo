@@ -5,7 +5,7 @@ httpx==0.27.2
 pydantic==2.9.2
 pydantic-settings==2.5.2
 python-dotenv==1.0.1
-volcengine==1.0.227
+volcengine>=1.0.220,<2
 tos>=2.7.0
 aiohttp>=3.9.0
 requests>=2.31.0
