@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
     await ark_client.close()
 
 
-app = FastAPI(title="Guwen QA MVP", lifespan=lifespan)
+app = FastAPI(title="知识助手", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

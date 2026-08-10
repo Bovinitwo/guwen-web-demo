@@ -1,6 +1,6 @@
-# 古文问答 MVP
+# 知识助手
 
-最小可运行的「上传文档 → 基于文档问答」demo。
+最小可运行的「上传文档 → 基于文档问答」demo，Codex 风格的清爽界面。
 
 - 后端：FastAPI，转发到 火山方舟 对话（OpenAI 兼容）和 火山方舟 知识库。
 - 前端：Vite + React + TypeScript，SSE 流式接收回答。
