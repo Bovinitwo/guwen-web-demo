@@ -1,0 +1,13 @@
+# backend
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.example
+.DS_Store
+
+# frontend
+node_modules/
+dist/
+.vscode/
+*.log
