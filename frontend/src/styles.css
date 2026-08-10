@@ -61,10 +61,56 @@ button {
   background: var(--sidebar);
   border-right: 1px solid var(--border);
   padding: 20px 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-scroll {
+  flex: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  margin: 4px -8px 0;
+  padding: 0 8px;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.conv-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.conv-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--ink-2);
+  font-size: 13px;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background 0.12s ease, color 0.12s ease;
+  border: 1px solid transparent;
+}
+.conv-item:hover {
+  background: rgba(0, 0, 0, 0.035);
+}
+.conv-item.active {
+  background: #ffffff;
+  color: var(--ink);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 .brand {
@@ -200,8 +246,7 @@ button {
 }
 
 .sidebar-footer {
-  margin-top: auto;
-  padding: 8px 6px;
+  padding: 10px 6px 4px;
   border-top: 1px solid var(--border);
   color: var(--muted);
   font-size: 11.5px;
