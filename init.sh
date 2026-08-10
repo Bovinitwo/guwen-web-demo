@@ -11,9 +11,9 @@ echo "==> [1/4] 检查 Python"
 PYTHON="${PYTHON:-python3}"
 if ! command -v "$PYTHON" >/dev/null 2>&1; then
   echo "[error] 找不到 python3."
-  echo "CentOS/RHEL 装 3.9:  sudo yum install -y python39 python39-devel"
+  echo "CentOS/RHEL 装 3.12: sudo yum install -y python3.12 python3.12-devel"
   echo "Ubuntu/Debian:       sudo apt install -y python3 python3-venv"
-  echo "然后重跑本脚本, 或用 PYTHON=python3.9 ./init.sh"
+  echo "然后重跑本脚本, 或用 PYTHON=python3.12 ./init.sh"
   exit 1
 fi
 
@@ -21,8 +21,8 @@ PYVER=$("$PYTHON" -c 'import sys;print("%d.%d"%sys.version_info[:2])')
 PYMAJOR=$("$PYTHON" -c 'import sys;print(sys.version_info[0])')
 PYMINOR=$("$PYTHON" -c 'import sys;print(sys.version_info[1])')
 if [[ "$PYMAJOR" -lt 3 || ( "$PYMAJOR" -eq 3 && "$PYMINOR" -lt 8 ) ]]; then
-  echo "[error] Python $PYVER 太老, 需要 >= 3.8"
-  echo "CentOS 7 装 3.9:  sudo yum install -y python39 && PYTHON=python3.9 ./init.sh"
+  echo "[error] Python $PYVER 太老, 需要 >= 3.8 (推荐 3.12)"
+  echo "CentOS 7 装 3.12:  sudo yum install -y python3.12 && PYTHON=python3.12 ./init.sh"
   exit 1
 fi
 echo "    Python $PYVER 位于 $(command -v "$PYTHON")"
